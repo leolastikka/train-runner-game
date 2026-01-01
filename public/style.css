@@ -1,0 +1,12 @@
+body {
+    margin: 0;
+}
+#points {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 70%;
+    text-align: center;
+    font-size: 6em;
+    color: blue;
+}
