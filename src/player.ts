@@ -1,17 +1,21 @@
 import * as THREE from 'three';
 import { RAIL, RAIL_DISTANCE } from './constant';
+import { Time } from './time';
+import { Asset } from './asset';
 
 enum MOVE_STATE {
-  MOVING = 0,
-  JUMPING = 1
+  MOVING,
+  JUMPING,
+  STOPPED
 }
 
 export class Player {
   public group: THREE.Group;
   public train: THREE.Mesh;
   public rail: RAIL = RAIL.MIDDLE;
-  public state: MOVE_STATE = MOVE_STATE.MOVING;
-  public speed: number = 5.0;
+  public speed: number = 4.0;
+
+  private state: MOVE_STATE = MOVE_STATE.MOVING;
 
   private jumpDuration: number = 0.5;
   private jumpHeight: number = 2.0;
@@ -26,12 +30,27 @@ export class Player {
 
   constructor() {
     this.group = new THREE.Group();
-    this.train = this.createTrain();
-
+    let trainGeometry = Asset.getGeometry('train')
+    if (!trainGeometry) {
+      trainGeometry = new THREE.BoxGeometry();
+    }
+    this.train = new THREE.Mesh(
+      trainGeometry,
+      Asset.getDefaultMaterial()
+    );
+    this.train.position.y = 1.2;
     this.group.add(this.train);
   }
 
-  public update(time: number) {
+  public update() {
+    if (this.state === MOVE_STATE.STOPPED) {
+      return;
+    }
+
+    const time = Time.getTotalTime();
+    const delta = Time.getDeltaTime();
+
+    this.group.position.z -= this.speed * delta;
     if (this.state !== MOVE_STATE.JUMPING) {
       return;
     }
@@ -64,8 +83,13 @@ export class Player {
     }
   }
 
-  public moveLeft(time: number) {
-    if (this.state === MOVE_STATE.JUMPING) {
+  public stop() {
+    this.state = MOVE_STATE.STOPPED;
+  }
+
+  public moveLeft() {
+    const time = Time.getTotalTime();
+    if (this.state !== MOVE_STATE.MOVING) {
       return;
     }
     if (this.rail === RAIL.LEFT) {
@@ -79,8 +103,9 @@ export class Player {
     this.jumpDirection = 1;
   }
 
-  public moveRight(time: number) {
-    if (this.state === MOVE_STATE.JUMPING) {
+  public moveRight() {
+    const time = Time.getTotalTime();
+    if (this.state !== MOVE_STATE.MOVING) {
       return;
     }
     if (this.rail === RAIL.RIGHT) {
@@ -92,14 +117,6 @@ export class Player {
     this.jumpStartX = this.group.position.x;
     this.jumpEndX = this.jumpStartX + RAIL_DISTANCE;
     this.jumpDirection = -1;
-  }
-
-  private createTrain(): THREE.Mesh {
-    const trainMaterial = new THREE.MeshBasicMaterial({ color: 0xdddddd });
-    const trainGeometry = new THREE.BoxGeometry(2, 2, 2);
-    const train = new THREE.Mesh(trainGeometry, trainMaterial);
-    train.position.y = 1;
-    return train;
   }
 
   private getJumpHeight(time: number): number {

@@ -1,7 +1,7 @@
 export class Input {
-  private keys: Set<string>;
+  private static keys: Set<string>;
 
-  constructor() {
+  public static init() {
     this.keys = new Set<string>();
     window.addEventListener('keydown', (event) => {
       this.keys.add(event.key);
@@ -11,7 +11,7 @@ export class Input {
     });
   }
 
-  public isKeyPressed(key: string): boolean {
+  public static isKeyPressed(key: string): boolean {
     return this.keys.has(key);
   }  
 }

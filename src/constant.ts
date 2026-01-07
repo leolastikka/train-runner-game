@@ -4,4 +4,4 @@ export enum RAIL {
   MIDDLE,
   RIGHT
 };
-export const RAIL_DISTANCE: number = 6.0;
+export const RAIL_DISTANCE: number = 7.0;

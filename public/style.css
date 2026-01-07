@@ -1,12 +1,102 @@
 body {
-    margin: 0;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  user-select: none;
+  color: white;
+  background-color: #00bee4;
 }
-#points {
-    position: absolute;
-    width: 100%;
-    left: 0;
-    top: 70%;
-    text-align: center;
-    font-size: 6em;
-    color: blue;
+#load, #menu, #game {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+}
+#load, #menu-top, #menu-bottom, #game-menu, #game-over {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+#load {
+  font-size: 4em;
+}
+#menu-top {
+  height: 15%;
+  font-size: 4em;
+}
+#menu-bottom {
+  flex-direction: column;
+  height: 85%;
+  background-color: #00c18e;
+  justify-content: flex-start;
+}
+.menu-level {
+  background-color: #929292;
+  width: 100%;
+  font-size: 4em;
+  margin-top: 0.25em;
+  cursor: pointer;
+}
+#game {
+  display: flex;
+  flex-direction: column;
+}
+#game-top {
+  display: flex;
+  height: 15%;
+}
+#game-bottom {
+  z-index: 2;
+  display: flex;
+  height: 85%;
+}
+#game-menu-button, #game-retry-button, #game-left-button, #game-right-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2em;
+  width: 50%;
+  height: 100%;
+  cursor: pointer;
+}
+#game-menu-button {
+  background-color: rgba(255,0,0,0.1);
+}
+#game-retry-button {
+  background-color: rgba(0,0,255,0.1);
+}
+#game-score {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 70%;
+  text-align: center;
+  font-size: 6em;
+  color: blue;
+}
+#game-over {
+  position: absolute;
+  font-size: 2em;
+  width: 100%;
+  height: 85%;
+  top: 15%;
+  font-size: 4em;
+  background-color: rgba(0,0,0,0.25);
+}
+
+.game-over-button {
+  width: 100%;
+  height: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+#game-over-back {
+  background-color: rgba(255,0,0,0.5);
+}
+#game-over-retry {
+  background-color: rgba(0,0,255,0.5);
 }

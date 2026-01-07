@@ -1,0 +1,53 @@
+{
+  "name": "2",
+  "points": [
+    {
+      "type": "person",
+      "operator": "+",
+      "value": 1,
+      "leftPositions": [],
+      "middlePositions": [],
+      "rightPositions": []
+    },
+    {
+      "type": "taxi",
+      "operator": "+",
+      "value": 10,
+      "leftPositions": [10,14,18],
+      "middlePositions": [],
+      "rightPositions": []
+    },
+    {
+      "type": "taxi",
+      "operator": "-",
+      "value": 10,
+      "leftPositions": [],
+      "middlePositions": [],
+      "rightPositions": []
+    },
+    {
+      "type": "stop",
+      "operator": "*",
+      "value": 2,
+      "leftPositions": [],
+      "middlePositions": [],
+      "rightPositions": [20]
+    },
+    {
+      "type": "stop",
+      "operator": "/",
+      "value": 2,
+      "leftPositions": [20],
+      "middlePositions": [20],
+      "rightPositions": []
+    },
+    {
+      "type": "station",
+      "operator": "-",
+      "value": 100,
+      "leftPositions": [25],
+      "middlePositions": [25],
+      "rightPositions": [25]
+    }
+  ]
+}

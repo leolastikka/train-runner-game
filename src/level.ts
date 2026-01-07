@@ -1,10 +1,18 @@
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/Addons.js';
 import { PLAYER_RADIUS, RAIL, RAIL_DISTANCE } from './constant';
-import { GROUND_MATERIAL, MINUS_MATERIAL, PERSON_GEOMETRY, PLUS_MATERIAL, RAIL_MATERIAL, STATION_GEOMETRY, STOP_GEOMETRY, TAXI_GEOMETRY } from './resource';
+import { Asset } from './asset';
 import type { Player } from './player';
 
-interface FilePointData {
+const GROUND_MATERIAL = new THREE.MeshBasicMaterial({color: 0x00c18e});
+const RAIL_MATERIAL = new THREE.MeshBasicMaterial({color: 0x929292});
+
+export interface LevelData {
+  name: string,
+  points: LevelPointData[]
+}
+
+export interface LevelPointData {
   type: string,
   operator: string,
   value: number,
@@ -14,10 +22,12 @@ interface FilePointData {
 }
 
 export class Level {
+  public name: string;
   public group: THREE.Group;
   public rails: Map<RAIL, THREE.Mesh[]>
 
-  constructor(levelData: any[]) {
+  constructor(levelData: LevelData) {
+    this.name = levelData.name;
     this.group = new THREE.Group();
     this.rails = new Map();
     this.rails.set(RAIL.LEFT, []);
@@ -26,7 +36,7 @@ export class Level {
 
     this.createGround();
     this.createRails();
-    this.createPoints(levelData);
+    this.createPoints(levelData.points);
   }
 
   public checkCollisions(score: number, player: Player): number {
@@ -66,7 +76,7 @@ export class Level {
       }
 
       userData.taken = true;
-      this.group.remove(point);
+      // this.group.remove(point);
       // railPoints.delete(z);
     }
 
@@ -96,8 +106,8 @@ export class Level {
     this.group.add(rail);
   }
 
-  private createPoints(levelData: FilePointData[]) {
-    for (let pointData of levelData) {
+  private createPoints(levelPointDatas: LevelPointData[]) {
+    for (let pointData of levelPointDatas) {
       if (pointData.leftPositions) {
         for (let z of pointData.leftPositions) {
           this.createPoint(
@@ -135,35 +145,40 @@ export class Level {
   }
 
   private createPoint(z: number, rail: RAIL, type: string, value: number, operator: string) {
+    let material: THREE.Material = Asset.getDefaultMaterial();
     let mesh: THREE.Mesh | null = null;
-    let material: THREE.Material = PLUS_MATERIAL;
-    if (operator === '-' || operator === '/') {
-      material = MINUS_MATERIAL;
-    }
+    let geometry: THREE.BufferGeometry | null = null;
 
     // forward is -z
     z = -z;
 
     if (type === 'person') {
-      mesh = new THREE.Mesh(PERSON_GEOMETRY, material);
-      mesh.position.y = 0.9;
+      geometry = Asset.getGeometry('plus-one');
     }
     else if (type === 'taxi') {
-      mesh = new THREE.Mesh(TAXI_GEOMETRY, material);
-      mesh.position.y = 0.8;
+      if (operator === '+') {
+        geometry = Asset.getGeometry('plus-ten');
+      }
+      else {
+        geometry = Asset.getGeometry('minus-ten');
+      }
     }
     else if (type === 'stop') {
-      mesh = new THREE.Mesh(STOP_GEOMETRY, material);
-      mesh.position.y = 0.8;
+      if (operator === '*') {
+        geometry = Asset.getGeometry('mult-two');
+      }
+      else {
+        geometry = Asset.getGeometry('div-two');
+      }
     }
     else if (type === 'station') {
-      mesh = new THREE.Mesh(STATION_GEOMETRY, material);
-      mesh.position.y = 1.5;
+      geometry = Asset.getGeometry('minus-hundred');
     }
 
-    if (!mesh) {
-      return
+    if (!geometry) {
+      return;
     }
+    mesh = new THREE.Mesh(geometry, material);
 
     // position and offsets
     mesh.position.z = z;
