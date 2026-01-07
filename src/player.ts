@@ -50,6 +50,11 @@ export class Player {
     const time = Time.getTotalTime();
     const delta = Time.getDeltaTime();
 
+    // browser throttles fps when tab is inactive
+    if (delta > 0.1) {
+      return;
+    }
+
     this.group.position.z -= this.speed * delta;
     if (this.state !== MOVE_STATE.JUMPING) {
       return;
