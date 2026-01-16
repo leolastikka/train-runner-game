@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/Addons.js';
-import { PLAYER_RADIUS, RAIL, RAIL_DISTANCE } from './constant';
+import { MODEL_DISTANCE, PLAYER_RADIUS, RAIL, RAIL_DISTANCE, TEXT_HEIGHT } from './constant';
 import { Asset } from './asset';
 import type { Player } from './player';
 
@@ -9,10 +9,10 @@ const RAIL_MATERIAL = new THREE.MeshBasicMaterial({color: 0x929292});
 
 export interface LevelData {
   name: string,
-  points: LevelPointData[]
+  modifiers: LevelModifierData[]
 }
 
-export interface LevelPointData {
+export interface LevelModifierData {
   type: string,
   operator: string,
   value: number,
@@ -36,7 +36,12 @@ export class Level {
 
     this.createGround();
     this.createRails();
-    this.createPoints(levelData.points);
+    this.createPoints(levelData.modifiers);
+  }
+
+  public destructor() {
+    this.group.clear();
+    this.rails.clear();
   }
 
   public checkCollisions(score: number, player: Player): number {
@@ -76,8 +81,7 @@ export class Level {
       }
 
       userData.taken = true;
-      // this.group.remove(point);
-      // railPoints.delete(z);
+      this.group.remove(point);
     }
 
     return score;
@@ -106,7 +110,7 @@ export class Level {
     this.group.add(rail);
   }
 
-  private createPoints(levelPointDatas: LevelPointData[]) {
+  private createPoints(levelPointDatas: LevelModifierData[]) {
     for (let pointData of levelPointDatas) {
       if (pointData.leftPositions) {
         for (let z of pointData.leftPositions) {
@@ -146,49 +150,36 @@ export class Level {
 
   private createPoint(z: number, rail: RAIL, type: string, value: number, operator: string) {
     let material: THREE.Material = Asset.getDefaultMaterial();
+    let textMaterial: THREE.Material = Asset.blueMaterial;
     let mesh: THREE.Mesh | null = null;
+    let textMesh: THREE.Mesh | null = null;
     let geometry: THREE.BufferGeometry | null = null;
+    let textGeometry: THREE.BufferGeometry | null = null;
 
     // forward is -z
     z = -z;
 
-    if (type === 'person') {
-      geometry = Asset.getGeometry('plus-one');
+    // select geometry based on type and operator
+    if (operator === '+' || operator === '*') {
+      geometry = Asset.getGeometry(`${type}-pos`);
     }
-    else if (type === 'taxi') {
-      if (operator === '+') {
-        geometry = Asset.getGeometry('plus-ten');
-      }
-      else {
-        geometry = Asset.getGeometry('minus-ten');
-      }
+    else {
+      geometry = Asset.getGeometry(`${type}-neg`);
+      textMaterial = Asset.redMaterial;
     }
-    else if (type === 'stop') {
-      if (operator === '*') {
-        geometry = Asset.getGeometry('mult-two');
-      }
-      else {
-        geometry = Asset.getGeometry('div-two');
-      }
-    }
-    else if (type === 'station') {
-      geometry = Asset.getGeometry('minus-hundred');
-    }
+    textGeometry = Asset.getTextGeometry(`${operator}${value}`);
 
-    if (!geometry) {
+    if (!geometry || !textGeometry) {
       return;
     }
     mesh = new THREE.Mesh(geometry, material);
+    textMesh = new THREE.Mesh(textGeometry, textMaterial);
 
     // position and offsets
     mesh.position.z = z;
-
-    if (operator === '+' || operator === '*') {
-      mesh.position.x += 2;
-    }
-    else if (operator === '-' || operator === '/') {
-      mesh.position.x -= 2;
-    }
+    mesh.position.x += MODEL_DISTANCE;
+    textMesh.position.x -= MODEL_DISTANCE;
+    textMesh.position.y = TEXT_HEIGHT;
 
     if (rail === RAIL.LEFT) {
       mesh.position.x -= RAIL_DISTANCE;
@@ -200,6 +191,7 @@ export class Level {
     mesh.userData.operator = operator;
     mesh.userData.value = value;
     mesh.userData.taken = false;
+    mesh.add(textMesh);
 
     this.rails.get(rail)?.push(mesh);
     this.group.add(mesh);

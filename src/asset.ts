@@ -1,13 +1,34 @@
 import * as THREE from 'three';
-import { OBJLoader } from 'three/examples/jsm/Addons.js';
+import { Font, FontLoader, OBJLoader, TextGeometry } from 'three/examples/jsm/Addons.js';
 import type { LevelData } from './level';
+import { FONT_LARGE, FONT_SMALL } from './constant';
 
 export class Asset {
   private static loadingManager: THREE.LoadingManager;
 
-  private static defaultMaterial: THREE.Material;
-  private static geometries: Map<string, THREE.BufferGeometry>;
-  private static levelDatas: Map<string, LevelData>;
+  private static defaultFont: Font = new Font({
+    glyphs: {},
+    familyName: '',
+    ascender: 0,
+    descender: 0,
+    underlinePosition: 0,
+    underlineThickness: 0,
+    boundingBox: { yMin: 0, xMin: 0, yMax: 0, xMax: 0 },
+    resolution: 0,
+    original_font_information: {}
+  });
+  private static defaultMaterial: THREE.Material = new THREE.MeshBasicMaterial({
+    color: 0xff00ff
+  });
+  public static readonly redMaterial: THREE.Material = new THREE.MeshBasicMaterial({
+    color: 0x923a3a
+  });
+  public static readonly blueMaterial: THREE.Material = new THREE.MeshBasicMaterial({
+    color: 0x315195
+  });
+  private static geometries: Map<string, THREE.BufferGeometry> = new Map();
+  private static textGeometries: Map<string, THREE.BufferGeometry> = new Map();
+  private static levelDatas: Map<string, LevelData> = new Map();
 
   static init(
     onLoad: () => void,
@@ -19,19 +40,20 @@ export class Asset {
       onProgress,
       onError
     );
-    this.defaultMaterial = new THREE.MeshBasicMaterial({
-      color: 0xff00ff
-    });
-    this.geometries = new Map();
-    this.levelDatas = new Map();
 
-    const objLoader = new OBJLoader(this.loadingManager);
-    objLoader.load('models.obj', this.parseGeometries.bind(this));
+    const fontLoader = new FontLoader(this.loadingManager);
+    fontLoader.load('zerove-regular.json', this.parseFont.bind(this));
     const texLoader = new THREE.TextureLoader(this.loadingManager);
     texLoader.load('colors.png', this.parseTexture.bind(this));
+    const objLoader = new OBJLoader(this.loadingManager);
+    objLoader.load('models.obj', this.parseGeometries.bind(this));
     const fileLoader = new THREE.FileLoader(this.loadingManager);
     fileLoader.load('levels/1.json', this.parseLevel.bind(this));
     fileLoader.load('levels/2.json', this.parseLevel.bind(this));
+  }
+
+  public static getDefaultFont(): Font {
+    return this.defaultFont;
   }
 
   public static getDefaultMaterial(): THREE.Material {
@@ -40,6 +62,14 @@ export class Asset {
 
   public static getGeometry(name: string): THREE.BufferGeometry | null {
     const geometry = this.geometries.get(name);
+    if (geometry) {
+      return geometry;
+    }
+    return null;
+  }
+
+  public static getTextGeometry(text: string): THREE.BufferGeometry | null {
+    const geometry = this.textGeometries.get(text);
     if (geometry) {
       return geometry;
     }
@@ -65,6 +95,10 @@ export class Asset {
     }
   }
 
+  private static parseFont(data: Font) {
+    this.defaultFont = data;
+  }
+
   private static parseTexture(data: THREE.Texture<HTMLImageElement>) {
     this.defaultMaterial = new THREE.MeshBasicMaterial({
       map: data
@@ -72,9 +106,34 @@ export class Asset {
   }
 
   private static parseLevel(data: string | ArrayBuffer) {
-    if (typeof data === 'string') {
-      const levelData = JSON.parse(data);
-      this.levelDatas.set(levelData.name, levelData);
+    if (typeof data !== 'string') {
+      return;
+    }
+
+    const levelData: LevelData = JSON.parse(data);
+    this.levelDatas.set(levelData.name, levelData);
+
+    for (let modifier of levelData.modifiers) {
+      const modifierText = `${modifier.operator}${modifier.value}`;
+      if (this.textGeometries.has(modifierText)) {
+        continue;
+      }
+
+      let fontSize = FONT_SMALL;
+      if (modifier.operator !== '+' || modifier.value !== 1) {
+        fontSize = FONT_LARGE;
+      }
+
+      const textGeometry = new TextGeometry(modifierText, {
+        font: this.defaultFont,
+        size: fontSize,
+        curveSegments: 4,
+        depth: 0.1,
+        bevelEnabled: false
+      });
+      textGeometry.center();
+
+      this.textGeometries.set(modifierText, textGeometry);
     }
   }
 }

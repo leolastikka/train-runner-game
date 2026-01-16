@@ -1,6 +1,6 @@
 {
   "name": "2",
-  "points": [
+  "modifiers": [
     {
       "type": "person",
       "operator": "+",

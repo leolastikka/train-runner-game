@@ -60,11 +60,10 @@ export class Player {
       return;
     }
 
-    const progress = Math.max(
-      Math.min(
-        (this.jumpDuration - (this.jumpEndTime - time)) / this.jumpDuration,
-        1.0),
-      0.0
+    const progress = THREE.MathUtils.clamp(
+      (this.jumpDuration - (this.jumpEndTime - time)) / this.jumpDuration,
+      0.0,
+      1.0
     );
 
     const x = THREE.MathUtils.lerp(

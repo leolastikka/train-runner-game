@@ -76,6 +76,13 @@ class Main {
   }
 
   private static startLevel(name: string) {
+    if (this.scene) {
+      this.scene.clear();
+    }
+    if (this.level) {
+      this.level.destructor();
+    }
+
     this.camera.position.set(0, 8, 7);  
 
     this.scene = new THREE.Scene();
