@@ -86,7 +86,7 @@ export class UI {
       const menuButton = document.createElement('div');
       menuButton.id = 'game-menu-button';
       menuButton.innerHTML = 'Menu';
-      menuButton.addEventListener('click', (event: Event) => {
+      menuButton.addEventListener('click', (_event: Event) => {
         if (onMenu) {
           onMenu();
         }
@@ -94,21 +94,21 @@ export class UI {
       const retryButton = document.createElement('div');
       retryButton.id = 'game-retry-button';
       retryButton.innerHTML = 'Retry';
-      retryButton.addEventListener('click', (event: Event) => {
+      retryButton.addEventListener('click', (_event: Event) => {
         if (onRetry) {
           onRetry();
         }
       });
       const leftButton = document.createElement('div');
       leftButton.id = 'game-left-button';
-      leftButton.addEventListener('pointerdown', (event: Event) => {
+      leftButton.addEventListener('pointerdown', (_event: Event) => {
         if (onLeft) {
           onLeft();
         }
       });
       const rightButton = document.createElement('div');
       rightButton.id = 'game-right-button';
-      rightButton.addEventListener('pointerdown', (event: Event) => {
+      rightButton.addEventListener('pointerdown', (_event: Event) => {
         if (onRight) {
           onRight();
         }
